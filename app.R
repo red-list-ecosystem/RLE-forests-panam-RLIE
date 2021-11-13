@@ -103,7 +103,7 @@ ui <- fluidPage(
             a("José R. Ferrer-Paris",href="https://github.com/jrfep")," from UNSW ",
             a("Centre for Ecosystem Science",href="https://www.ecosystem.unsw.edu.au/"),
             " and UNSW Data Science Hub. ",
-            a("Source code.",href="https://github.com/jrfep")),
+            a("Source code.",href="https://github.com/red-list-ecosystem/RLE-forests-panam-RLIE")),
           p("More apps ",a("here.",href="http://apps.global-ecosystems.org/"))
         )
     )

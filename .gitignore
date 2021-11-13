@@ -2,6 +2,7 @@
 sandbox/
 .Rproj.user
 test.*
+*.rda
 
 # do we need this?
 rsconnect
