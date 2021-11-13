@@ -10,9 +10,8 @@
 library(shiny)
 require(tidyr)
 require(dplyr)
-#require(ISOcodes)
-#library(plotly)
 require(DT)
+require(ggplot2)
 
 if (!file.exists("20181123_MacrogroupsCountry.rda"))
   download.file("https://figshare.com/ndownloader/files/13874333","20181123_MacrogroupsCountry.rda")
@@ -53,10 +52,6 @@ data <-
             DD=sum(Overall.Category %in% "DD"),
             ## NE=sum(Overall.Category %in% "LE"),
             `RLI of ecosystems`=RLIe(Overall.Category))
-            #  %>%   mutate(iso3=case_when(
-            #  Country %in% "Venezuela"~"VEN",
-            #    Country %in% "Bolivia"~"BOL",
-            #    TRUE ~ ISO_3166_1$Alpha_3[match(Country,ISO_3166_1$Name)]))
 
 df <- data %>% arrange(`Threat score`) %>% mutate(order=order(`Threat score`))
 
