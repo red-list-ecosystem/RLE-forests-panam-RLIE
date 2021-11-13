@@ -12,6 +12,7 @@ require(tidyr)
 require(dplyr)
 require(DT)
 require(ggplot2)
+require(plotly)
 
 if (!file.exists("20181123_MacrogroupsCountry.rda"))
   download.file("https://figshare.com/ndownloader/files/13874333","20181123_MacrogroupsCountry.rda")
@@ -74,7 +75,7 @@ ui <- fluidPage(
         sidebarPanel(
           selectInput(inputId="index",
                       label="Index to show", opts),
-          plotOutput("whatPlot"),
+          plotlyOutput("whatPlot"),
           h4("You can highlight countries by selecting from the table."),
           verbatimTextOutput('x4')
                   ),
@@ -112,7 +113,7 @@ ui <- fluidPage(
 # Define server logic required to draw plot
 server <- function(input, output) {
 
-    output$whatPlot <- renderPlot({
+    output$whatPlot <- renderPlotly({
       s = input$Table_rows_selected
       if (length(s)) {
         slc <- df %>% slice(s) %>% pull(Country)
@@ -120,22 +121,21 @@ server <- function(input, output) {
         slc <- ""
       }
 
-      p <- ggplot({df %>% mutate(selected=Country %in% slc)}) +
-        labs(title="Forest Macrogroups of the Americas")
+      p <- ggplot({df %>% mutate(selected=Country %in% slc)}) 
 
       if(input$index=="Threat score") {
-        pp <- p + geom_point(aes(y=`Threat score`,x=order, colour=selected)) + ylim(0,5) +
-          xlab("Countries ordered from lowest to highest treat score") +
-          annotate("text", x = 2, y = c(0,5), label = c("All Least Concern","All Collapsed"),
-                   hjust=0,color=c("darkgreen","black"))
+        pp <- p + geom_point(aes(y=`Threat score`,x=order, colour=selected,label=Country)) + ylim(0,5) +
+          xlab("Countries from lowest to highest risk") +
+          annotate("text", x = 12, y = c(0,5), label = c("All Least Concern","All Collapsed"),
+                   hjust=0, color=c("darkgreen","black"))
       } else {
-        pp <- p + geom_point(aes(y=`RLI of ecosystems`,x=order, colour=selected))  +
+        pp <- p + geom_point(aes(y=`RLI of ecosystems`,x=order, colour=selected,label=Country))  +
           ylab("Red List Index of Ecosystems") + ylim(0,1) +
-          xlab("Countries ordered from lowest to highest risk") +
-          annotate("text", x = 2, y = c(1,0), label = c("All Least Concern","All Collapsed"),
+          xlab("Countries from lowest to highest risk") +
+          annotate("text", x = 12, y = c(1,0), label = c("All Least Concern","All Collapsed"),
                    hjust=0,color=c("darkgreen","black"))
       }
-      pp +  theme_minimal()
+      ggplotly(pp +  theme_minimal()+theme(legend.position='none') )
       })
 
     output$Table <- DT::renderDataTable({
