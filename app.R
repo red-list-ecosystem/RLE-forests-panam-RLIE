@@ -10,8 +10,8 @@
 library(shiny)
 require(tidyr)
 require(dplyr)
-require(ISOcodes)
-library(plotly)
+#require(ISOcodes)
+#library(plotly)
 require(DT)
 
 if (!file.exists("20181123_MacrogroupsCountry.rda"))
@@ -41,9 +41,9 @@ RLIe <- function(x,w=c("CO"=5,"CR"=4,"EN"=3,"VU"=2,"NT"=1,"LC"=0,"DD"=NA,"NE"=NA
   1-(TS/max(w,na.rm = T))
 }
 
-data <- 
-  Macrogroups.Country %>% 
-  group_by(Country) %>% 
+data <-
+  Macrogroups.Country %>%
+  group_by(Country) %>%
   summarise(`Threat score`=threat.score(Overall.Category),
             CR=sum(Overall.Category %in% "CR"),
             EN=sum(Overall.Category %in% "EN"),
@@ -52,11 +52,11 @@ data <-
             LC=sum(Overall.Category %in% "LC"),
             DD=sum(Overall.Category %in% "DD"),
             ## NE=sum(Overall.Category %in% "LE"),
-            `RLI of ecosystems`=RLIe(Overall.Category)) %>% 
-  mutate(iso3=case_when(
-    Country %in% "Venezuela"~"VEN",
-    Country %in% "Bolivia"~"BOL",
-    TRUE ~ ISO_3166_1$Alpha_3[match(Country,ISO_3166_1$Name)]))
+            `RLI of ecosystems`=RLIe(Overall.Category))
+            #  %>%   mutate(iso3=case_when(
+            #  Country %in% "Venezuela"~"VEN",
+            #    Country %in% "Bolivia"~"BOL",
+            #    TRUE ~ ISO_3166_1$Alpha_3[match(Country,ISO_3166_1$Name)]))
 
 df <- data %>% arrange(`Threat score`) %>% mutate(order=order(`Threat score`))
 
@@ -67,7 +67,7 @@ opts <- c("Red List Index of ecosystems","Threat score")
 ui <- fluidPage(
 
     # Application title
-    
+
     titlePanel( div(column(width = 3, tags$a(href='http://apps.global-ecosystems.org',
                                              tags$img(src='logo.png', width = 220))),
                     column(width = 9, h1("Forest Macrogroups of the Americas"),h2("Red List Index of Ecosystems")
@@ -77,7 +77,7 @@ ui <- fluidPage(
     # Sidebar with a select input for number of bins
     sidebarLayout(
         sidebarPanel(
-          selectInput(inputId="index", 
+          selectInput(inputId="index",
                       label="Index to show", opts),
           plotOutput("whatPlot"),
           h4("You can highlight countries by selecting from the table."),
@@ -92,12 +92,12 @@ ui <- fluidPage(
           p("The ",strong("Threat score")," is calculated according to Ferrer-Paris et al. (2019). Higher values mean higher level of threat."),
           DTOutput("Table"),
           p("The columns represent the number of ecosystems in each category:",
-          strong("CR")," Critically Endangered, ", 
-          strong("EN")," Endangered, " , 
-          strong("VU")," Vulnerable, " , 
-          strong("NT")," Near Threatened, " , 
-          strong("LC")," Least Concern, " , 
-          ## strong("NE")," Not Evaluated, " , 
+          strong("CR")," Critically Endangered, ",
+          strong("EN")," Endangered, " ,
+          strong("VU")," Vulnerable, " ,
+          strong("NT")," Near Threatened, " ,
+          strong("LC")," Least Concern, " ,
+          ## strong("NE")," Not Evaluated, " ,
           strong("DD")," Data Deficient. "),
           h3("References"),
           p("Ferrer-Paris, J.R., Zager, I., Keith, D.A., Oliveira-Miranda, M.A., Rodríguez, J.P, Josse, C., González-Gil, M., Miller, R.M., Zambrana-Torrelio, C., Barrow, E., 2019. An ecosystem risk assessment of temperate and tropical forests of the Americas with an outlook on future conservation strategies. Conserv. Lett. 12. ",a("DOI:10.1111/conl.12623", href="https://doi.org/10.1111/conl.12623")),
@@ -124,29 +124,29 @@ server <- function(input, output) {
       } else {
         slc <- ""
       }
-      
-      p <- ggplot({df %>% mutate(selected=Country %in% slc)}) + 
+
+      p <- ggplot({df %>% mutate(selected=Country %in% slc)}) +
         labs(title="Forest Macrogroups of the Americas")
-      
+
       if(input$index=="Threat score") {
-        pp <- p + geom_point(aes(y=`Threat score`,x=order, colour=selected)) + ylim(0,5) + 
-          xlab("Countries ordered from lowest to highest treat score") + 
+        pp <- p + geom_point(aes(y=`Threat score`,x=order, colour=selected)) + ylim(0,5) +
+          xlab("Countries ordered from lowest to highest treat score") +
           annotate("text", x = 2, y = c(0,5), label = c("All Least Concern","All Collapsed"),
                    hjust=0,color=c("darkgreen","black"))
       } else {
-        pp <- p + geom_point(aes(y=`RLI of ecosystems`,x=order, colour=selected))  + 
-          ylab("Red List Index of Ecosystems") + ylim(0,1) + 
-          xlab("Countries ordered from lowest to highest risk") + 
+        pp <- p + geom_point(aes(y=`RLI of ecosystems`,x=order, colour=selected))  +
+          ylab("Red List Index of Ecosystems") + ylim(0,1) +
+          xlab("Countries ordered from lowest to highest risk") +
           annotate("text", x = 2, y = c(1,0), label = c("All Least Concern","All Collapsed"),
                    hjust=0,color=c("darkgreen","black"))
       }
-      pp +  theme_minimal() 
+      pp +  theme_minimal()
       })
-    
+
     output$Table <- DT::renderDataTable({
-      
-        datatable(df %>% select(Country,`RLI of ecosystems`,`Threat score`,CR,EN,VU,NT,LC,DD)) %>% 
-        formatRound(c(2:3), 2) %>% 
+
+        datatable(df %>% select(Country,`RLI of ecosystems`,`Threat score`,CR,EN,VU,NT,LC,DD)) %>%
+        formatRound(c(2:3), 2) %>%
         formatStyle(columns = c(2:10), 'text-align' = 'center') %>%
         formatStyle(
           'CR',
@@ -176,8 +176,8 @@ server <- function(input, output) {
           'DD',
           color = styleInterval(c(0.5), c('black', 'white')),
           backgroundColor = styleInterval(0.5, c('white', 'grey'))
-        ) 
-      
+        )
+
     })
     # print the selected indices
     output$x4 = renderPrint({
@@ -186,9 +186,9 @@ server <- function(input, output) {
         cat('Selected countries are:\n\n')
         slc <- df %>% slice(s) %>% pull(Country)
         cat(slc, sep = ', ')
-      } 
+      }
     })
-    
+
 }
 
 # Run the application
